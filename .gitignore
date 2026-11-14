@@ -1,0 +1,11 @@
+node_modules/
+dist/
+data/
+.e2e-data/
+test-results/
+playwright-report/
+release/
+release-arm64/
+*.log
+.DS_Store
+.env

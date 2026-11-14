@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; font-src 'self'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ICEHOME Desktop</title>
+    <link rel="stylesheet" href="launcher.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="rail">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M4 10.5 12 4l8 6.5" />
+              <path d="M6.4 9.6V20h11.2V9.6" />
+              <rect x="10.1" y="14" width="3.8" height="6" />
+            </svg>
+          </div>
+          <div>
+            <strong>ICEHOME</strong>
+            <span>DESKTOP</span>
+          </div>
+        </div>
+
+        <div class="rail-label">连接模式</div>
+        <button class="mode-tab is-active" id="tabLocal" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <rect x="3.5" y="4.5" width="17" height="11" rx="2" />
+            <path d="M7 20h10M12 15.5V20" />
+          </svg>
+          <span>
+            <b>本地模式</b>
+            <small>应用内运行完整服务</small>
+          </span>
+        </button>
+        <button class="mode-tab" id="tabRemote" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M4.5 9h15M4.5 15h15M12 4c2.3 2.2 3.4 5 3.4 8s-1.1 5.8-3.4 8c-2.3-2.2-3.4-5-3.4-8s1.1-5.8 3.4-8Z" />
+          </svg>
+          <span>
+            <b>远程模式</b>
+            <small>连接现有面板服务</small>
+          </span>
+        </button>
+
+        <div class="rail-spacer"></div>
+        <div class="device-card">
+          <div class="device-row">
+            <span>运行环境</span>
+            <b id="platformText">—</b>
+          </div>
+          <div class="device-row">
+            <span>CPU 架构</span>
+            <b id="archText">—</b>
+          </div>
+          <div class="device-row">
+            <span>Electron</span>
+            <b id="electronText">—</b>
+          </div>
+          <div class="device-row">
+            <span>版本</span>
+            <b id="versionText">—</b>
+          </div>
+        </div>
+        <p class="rail-foot">同一套账户、设备与平面图数据。桌面端只负责启动服务或连接服务，不修改业务数据。</p>
+      </aside>
+
+      <main class="workspace">
+        <header class="workspace-head">
+          <div>
+            <p class="eyebrow">ICEHOME / DESKTOP CONSOLE</p>
+            <h1>连接你的家</h1>
+            <p class="lede">选择本地内嵌服务或远程面板。两种模式共用同一套 Web 界面与权限体系。</p>
+          </div>
+          <div class="head-badge">
+            <i></i>
+            <span id="headMode">本地模式</span>
+          </div>
+        </header>
+
+        <section class="panel local-panel is-current" id="localPanel">
+          <div class="panel-head">
+            <div>
+              <h2>本地模式</h2>
+              <p>在应用内启动 Express 服务，数据默认保存在应用数据目录。</p>
+            </div>
+            <span class="tag">ZERO CONFIG</span>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>服务端口</span>
+              <input id="localPort" type="number" min="1" max="65535" step="1" />
+              <small>被占用时自动顺延最多 10 个端口。</small>
+            </label>
+            <label class="field">
+              <span>监听范围</span>
+              <select id="localHost">
+                <option value="0.0.0.0">局域网 + 本机</option>
+                <option value="127.0.0.1">仅本机</option>
+              </select>
+              <small>局域网模式方便手机、平板访问同一面板。</small>
+            </label>
+          </div>
+
+          <div class="field">
+            <span>数据目录</span>
+            <div class="path-row">
+              <input id="dataDir" type="text" readonly />
+              <button class="ghost" id="chooseDir" type="button">选择</button>
+            </div>
+            <small>默认使用应用数据目录；也可以指向项目现有的 <code>data</code> 目录。</small>
+          </div>
+
+          <div class="status-box" id="localStatus">
+            <div class="status-main">
+              <span class="status-dot" id="localDot"></span>
+              <div>
+                <b id="localStatusTitle">服务未启动</b>
+                <small id="localStatusText">启动后会自动打开控制面板。</small>
+              </div>
+            </div>
+            <div class="status-actions" id="localUrls"></div>
+          </div>
+
+          <div class="panel-actions">
+            <button class="primary" id="connectLocal" type="button">启动并使用</button>
+            <button class="ghost" id="restartLocal" type="button">重启服务</button>
+          </div>
+        </section>
+
+        <section class="panel remote-panel" id="remotePanel">
+          <div class="panel-head">
+            <div>
+              <h2>远程模式</h2>
+              <p>连接局域网或反向代理后的 ICEHOME，适合把面板跑在 NAS / 小主机上。</p>
+            </div>
+            <span class="tag">EXISTING SERVER</span>
+          </div>
+
+          <label class="field">
+            <span>服务器根地址</span>
+            <input id="remoteUrl" type="text" placeholder="http://192.168.1.10:8787" spellcheck="false" />
+            <small>只填根地址，不带 <code>/api</code> 或查询参数。</small>
+          </label>
+
+          <div class="profiles-head">
+            <span>常用服务器</span>
+            <small>连接成功后自动保存，最多 8 个。</small>
+          </div>
+          <div class="profiles" id="profiles"></div>
+
+          <label class="check-line">
+            <input id="allowSelfSigned" type="checkbox" />
+            <span>允许当前远程主机的自签名 HTTPS 证书</span>
+          </label>
+
+          <div class="status-box compact" id="remoteStatus">
+            <div class="status-main">
+              <span class="status-dot" id="remoteDot"></span>
+              <div>
+                <b id="remoteStatusTitle">尚未测试</b>
+                <small id="remoteStatusText">先测试连接，再打开远程面板。</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-actions">
+            <button class="ghost" id="testRemote" type="button">测试连接</button>
+            <button class="primary" id="connectRemote" type="button">连接远程面板</button>
+          </div>
+        </section>
+
+        <footer class="workspace-foot">
+          <div class="foot-top">
+            <label class="check-line">
+              <input id="autoConnect" type="checkbox" />
+              <span>下次启动自动连接当前模式</span>
+            </label>
+            <span class="error-line" id="errorLine" role="alert"></span>
+          </div>
+          <div class="log" id="logBox" aria-live="polite"></div>
+        </footer>
+      </main>
+    </div>
+
+    <div class="overlay" id="overlay" hidden>
+      <div class="overlay-card">
+        <span class="spinner" aria-hidden="true"></span>
+        <b id="overlayTitle">正在连接</b>
+        <small id="overlayText">请稍候，正在准备面板服务。</small>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <script src="launcher.js"></script>
+  </body>
+</html>
